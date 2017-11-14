@@ -45,8 +45,14 @@ def get_index(keyword, page):
 
     url = base_url + urlencode(params)
     html = get_html(url)
-    print(html)
+    print(200)
+
+# 2.模拟302的出现场景
+def main():
+    for page in range(1, 101):
+        get_index(keyword, page)
+
 
 # 中文测试
 if __name__ == '__main__':
-    get_index(keyword, 20)
+    main()
