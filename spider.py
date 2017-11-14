@@ -27,14 +27,28 @@ proxy = None
 # 0获取网页内容
 # 因为当请求为302的时候，网页会自动跳转到反爬虫网页，我们禁止其自动跳转allow_redirects=False
 def get_html(url):
+    global proxy
     try:
-        response = requests.get(url, allow_redirects=False, headers=headers)
+        if proxy:
+            proxies = {
+                "http": "http://" + proxy
+            }
+            response = requests.get(url, allow_redirects=False, headers=headers, proxies=proxies)
+        else:
+            response = requests.get(url, allow_redirects=False, headers=headers)
         if response.status_code == 200:
             return response.text
         if response.status_code == 302:
-            print("启动代理服务器")
-            pass
+            print("302")
+            proxy = get_proxy()
+            if proxy:
+                print("use proxy--" + proxy)
+                return get_html(url)
+            else:
+                print("Get Proxy Error")
+                return None
     except ConnectionError:
+        proxy = get_proxy()
         return get_html(url)
 
 
@@ -55,6 +69,7 @@ def get_index(keyword, page):
 def main():
     for page in range(1, 101):
         get_index(keyword, page)
+    print("end")
 
 
 # 3.获取代理
@@ -67,9 +82,9 @@ def get_proxy():
         return None
     except ConnectionError:
         print("get proxy error")
-        get_proxy()
+        return None
 
 
 # 中文测试
 if __name__ == '__main__':
-    print(get_proxy())
+    main()
