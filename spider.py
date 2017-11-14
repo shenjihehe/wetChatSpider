@@ -20,6 +20,9 @@ headers = {
 
 keyword = "风景"
 
+# 默认不使用代理
+proxy = None
+
 
 # 0获取网页内容
 # 因为当请求为302的时候，网页会自动跳转到反爬虫网页，我们禁止其自动跳转allow_redirects=False
@@ -47,12 +50,26 @@ def get_index(keyword, page):
     html = get_html(url)
     print(200)
 
+
 # 2.模拟302的出现场景
 def main():
     for page in range(1, 101):
         get_index(keyword, page)
 
 
+# 3.获取代理
+def get_proxy():
+    url = "http://127.0.0.1:5000/get"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+        return None
+    except ConnectionError:
+        print("get proxy error")
+        get_proxy()
+
+
 # 中文测试
 if __name__ == '__main__':
-    main()
+    print(get_proxy())
