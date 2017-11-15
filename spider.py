@@ -3,6 +3,8 @@ from urllib.parse import urlencode
 
 import requests
 
+from pyquery import PyQuery as pq
+
 base_url = "http://weixin.sogou.com/weixin?"
 
 # 超过10页的数据需要登录才能查看，故拼接cookie
@@ -37,6 +39,7 @@ def get_html(url):
         else:
             response = requests.get(url, allow_redirects=False, headers=headers)
         if response.status_code == 200:
+            print("200")
             return response.text
         if response.status_code == 302:
             print("302")
@@ -62,14 +65,18 @@ def get_index(keyword, page):
 
     url = base_url + urlencode(params)
     html = get_html(url)
-    print(200)
+    return html
 
 
 # 2.模拟302的出现场景
 def main():
     for page in range(1, 101):
-        get_index(keyword, page)
-    print("end")
+        html = get_index(keyword, page)
+        parse_index(html)
+        if html:
+            urls = parse_index(html)
+            for url in urls:
+                print("爬取的详情链接--" + url)
 
 
 # 3.获取代理
@@ -85,6 +92,14 @@ def get_proxy():
         return None
 
 
-# 中文测试
+# 4.解析列表页面的数据，主要爬取详情页面的url
+def parse_index(html):
+    print("parse index html")
+    doc = pq(html)
+    items = doc(".news-box .news-list li .txt-box h3 a").items()
+    for item in items:
+        yield item.attr("href")
+
+#  中文测试
 if __name__ == '__main__':
     main()
